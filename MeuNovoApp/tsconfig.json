@@ -1,0 +1,18 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./build",
+    "baseUrl": "./src",
+    "paths": {
+      "@storage/*": ["app/storage/*"]
+    }
+  },
+  "include": ["app/**/*"]
+}
