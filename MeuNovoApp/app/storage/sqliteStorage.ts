@@ -161,3 +161,30 @@ export const saveRoute = (routeId: string, name: string, startTime: string, endT
   });
 };
 
+export const getRoutes = (): Promise<any[]> => {
+  return new Promise((resolve, reject) => {
+    console.log('Buscando rotas registradas...');
+
+    db.transaction(tx => {
+      // Busca todas as rotas da tabela 'routes'
+      tx.executeSql(
+        'SELECT * FROM routes;',
+        [],
+        (_, result) => {
+          const routesList: any[] = [];
+          for (let i = 0; i < result.rows.length; i++) {
+            routesList.push(result.rows.item(i));
+          }
+          console.log('Rotas encontradas:', routesList);
+          resolve(routesList); // Retorna a lista de rotas
+        },
+        (_, error) => {
+          console.error('Erro ao buscar rotas:', error);
+          reject(error); // Rejeita em caso de erro
+        }
+      );
+    });
+  });
+};
+
+
