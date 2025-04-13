@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { getRoutes } from '../storage/sqliteStorage';
 
-const RoutesScreen = () => {
+const RoutesScreen = ({ navigation }) => {
   const [routes, setRoutes] = useState([]);
 
   useEffect(() => {
@@ -18,13 +18,15 @@ const RoutesScreen = () => {
     fetchRoutes();
   }, []);
 
-
   const renderItem = ({ item }) => (
-    <View style={styles.routeItem}>
+    <TouchableOpacity
+      style={styles.routeItem}
+      onPress={() => navigation.navigate('RouteMap', { routeId: item.id })} // Navega para a tela do mapa
+    >
       <Text style={styles.routeName}>{item.name}</Text>
       <Text>{`Início: ${item.startTime}`}</Text>
       <Text>{`Fim: ${item.endTime}`}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

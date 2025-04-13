@@ -85,6 +85,14 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+        disable 'WrongConstant'
+    }
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

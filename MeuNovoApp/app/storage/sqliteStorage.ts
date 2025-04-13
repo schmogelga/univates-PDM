@@ -187,4 +187,31 @@ export const getRoutes = (): Promise<any[]> => {
   });
 };
 
+export const getRoutePoints = (routeId: string): Promise<any[]> => {
+  return new Promise((resolve, reject) => {
+    console.log(`Buscando pontos da rota com ID: ${routeId}...`);
+
+    db.transaction(tx => {
+      // Busca os pontos da rota com base no ID da rota
+      tx.executeSql(
+        'SELECT * FROM route_points WHERE routeId = ?;',
+        [routeId],
+        (_, result) => {
+          const pointsList: any[] = [];
+          for (let i = 0; i < result.rows.length; i++) {
+            pointsList.push(result.rows.item(i));
+          }
+          console.log('Pontos encontrados:', pointsList);
+          resolve(pointsList); // Retorna os pontos da rota
+        },
+        (_, error) => {
+          console.error('Erro ao buscar pontos da rota:', error);
+          reject(error); // Rejeita em caso de erro
+        }
+      );
+    });
+  });
+};
+
+
 
