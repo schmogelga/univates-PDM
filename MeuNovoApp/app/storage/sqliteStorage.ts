@@ -13,21 +13,22 @@ export const initDB = () => {
     db.transaction(tx => {
       // Verifica a existência e estrutura da tabela 'routes'
       tx.executeSql(
-        `PRAGMA table_info(routes);`, // Comando PRAGMA para verificar a estrutura da tabela 'routes'
+        `PRAGMA table_info(routes);`,
         [],
         (_, result) => {
           if (result.rows.length === 0) {
-            // Se a tabela 'routes' não existir, cria ela
+            // Tabela não existe ainda: cria com a coluna imageUri
             tx.executeSql(
               `CREATE TABLE IF NOT EXISTS routes (
                 id TEXT PRIMARY KEY NOT NULL,
                 name TEXT NOT NULL,
                 startTime TEXT NOT NULL,
-                endTime TEXT NOT NULL
+                endTime TEXT NOT NULL,
+                imageUri TEXT
               );`,
               [],
               () => {
-                console.log('Tabela "routes" criada com sucesso ou já existente.');
+                console.log('Tabela "routes" criada com sucesso.');
               },
               (_, error) => {
                 console.error('Erro ao criar tabela "routes":', error);
@@ -36,16 +37,36 @@ export const initDB = () => {
               }
             );
           } else {
-            console.log('Tabela "routes" já existe e sua estrutura foi verificada.');
+            console.log('Tabela "routes" já existe, verificando coluna "imageUri"...');
+
+            const hasImageUri = Array.from({ length: result.rows.length }).some((_, i) => {
+              return result.rows.item(i).name === 'imageUri';
+            });
+
+            if (!hasImageUri) {
+              tx.executeSql(
+                `ALTER TABLE routes ADD COLUMN imageUri TEXT;`,
+                [],
+                () => {
+                  console.log('Coluna "imageUri" adicionada com sucesso à tabela "routes".');
+                },
+                (_, error) => {
+                  console.error('Erro ao adicionar coluna "imageUri":', error);
+                  reject(error);
+                  return false;
+                }
+              );
+            } else {
+              console.log('Coluna "imageUri" já existe.');
+            }
           }
 
           // Verifica a existência e estrutura da tabela 'route_points'
           tx.executeSql(
-            `PRAGMA table_info(route_points);`, // Comando PRAGMA para verificar a estrutura da tabela 'route_points'
+            `PRAGMA table_info(route_points);`,
             [],
             (_, result) => {
               if (result.rows.length === 0) {
-                // Se a tabela 'route_points' não existir, cria ela
                 tx.executeSql(
                   `CREATE TABLE IF NOT EXISTS route_points (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,8 +78,8 @@ export const initDB = () => {
                   );`,
                   [],
                   () => {
-                    console.log('Tabela "route_points" criada com sucesso ou já existente.');
-                    resolve(); // Chama resolve depois de ambas as tabelas serem verificadas e criadas, se necessário
+                    console.log('Tabela "route_points" criada com sucesso.');
+                    resolve();
                   },
                   (_, error) => {
                     console.error('Erro ao criar tabela "route_points":', error);
@@ -68,7 +89,7 @@ export const initDB = () => {
                 );
               } else {
                 console.log('Tabela "route_points" já existe e sua estrutura foi verificada.');
-                resolve(); // Tabela 'route_points' já existe
+                resolve();
               }
             },
             (_, error) => {
@@ -87,6 +108,7 @@ export const initDB = () => {
     });
   });
 };
+
 
 
 export const checkTableStructure = (tableName: string) => {
@@ -118,17 +140,44 @@ export const checkTableStructure = (tableName: string) => {
   });
 };
 
-export const saveRoute = (routeId: string, name: string, startTime: string, endTime: string, points: any[]) => {
+export const deleteRoutesByIds = (ids: string[]): Promise<void> => {
   return new Promise((resolve, reject) => {
-    console.log('Iniciando o salvamento da rota...');
-    console.log(`Dados da rota: ID: ${routeId}, Nome: ${name}, Início: ${startTime}, Fim: ${endTime}`);
+    if (ids.length === 0) {
+      resolve();
+      return;
+    }
+
+    const placeholders = ids.map(() => '?').join(','); // ?, ?, ?
+    const query = `DELETE FROM routes WHERE id IN (${placeholders});`;
 
     db.transaction(tx => {
-      // Insere a rota no banco de dados
-      console.log('Inserindo rota na tabela routes...');
       tx.executeSql(
-        'INSERT INTO routes (id, name, startTime, endTime) VALUES (?, ?, ?, ?);',
-        [routeId, name, startTime, endTime],
+        query,
+        ids,
+        () => {
+          console.log(`Rotas deletadas com sucesso: ${ids.join(', ')}`);
+          resolve();
+        },
+        (_, error) => {
+          console.error('Erro ao deletar rotas:', error);
+          reject(error);
+          return false;
+        }
+      );
+    });
+  });
+};
+
+
+export const saveRoute = (routeId: string, name: string, startTime: string, endTime: string, points: any[], imageUri?: string | null) => {
+  return new Promise((resolve, reject) => {
+    console.log('Iniciando o salvamento da rota...');
+    console.log(`Dados da rota: ID: ${routeId}, Nome: ${name}, Início: ${startTime}, Fim: ${endTime}, Imagem: ${imageUri}`);
+
+    db.transaction(tx => {
+      tx.executeSql(
+        'INSERT INTO routes (id, name, startTime, endTime, imageUri) VALUES (?, ?, ?, ?, ?);',
+        [routeId, name, startTime, endTime, imageUri || null],
         (_, result) => {
           console.log('Rota inserida com sucesso na tabela routes!');
           console.log('Resultado da inserção da rota:', result);

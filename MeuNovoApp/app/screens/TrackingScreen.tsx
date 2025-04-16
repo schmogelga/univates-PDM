@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Button, Text, TextInput, Alert } from 'react-native';
+import { View, Button, Text, TextInput, Alert, Image } from 'react-native';
 import { getCurrentLocation } from '../services/location';
 import { saveRoute, initDB, checkTableStructure } from '../storage/sqliteStorage';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 
 export default function TrakingScreen() {
   const [isTracking, setIsTracking] = useState(false);
   const [route, setRoute] = useState([]);
     const [routeName, setRouteName] = useState(''); // Estado para armazenar o nome da rota
+    const [imageUri, setImageUri] = useState<string | null>(null); // Estado para imagem
   const trackingInterval = useRef<any>(null);
 
   useEffect(() => {
@@ -15,6 +17,20 @@ export default function TrakingScreen() {
     checkTableStructure('routes');
     checkTableStructure('route_points');
   }, []);
+
+  const selectImage = () => {
+    launchImageLibrary({ mediaType: 'photo' }, (response) => {
+      if (response.didCancel) {
+        console.log('Seleção de imagem cancelada');
+      } else if (response.errorMessage) {
+        console.error('Erro ao selecionar imagem:', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        const uri = response.assets[0].uri;
+        console.log('Imagem selecionada:', uri);
+        setImageUri(uri || null);
+      }
+    });
+  };
 
   const startTracking = () => {
     setRoute([]);  // Limpa a rota anterior
@@ -31,7 +47,7 @@ export default function TrakingScreen() {
       } catch (error) {
         console.error('Erro ao obter localização:', error);
       }
-    }, 5000); // Coleta a localização a cada 5 segundos
+    }, 1000); // Coleta a localização a cada 5 segundos
   };
 
 const stopTracking = async () => {
@@ -49,7 +65,7 @@ const stopTracking = async () => {
         const routeId = `route-${startTime}`;  // Usando o tempo de início como identificador de rota
 
         // Salva a rota com os pontos no banco
-      await saveRoute(routeId, routeName || 'Rota sem nome', startTime, endTime, route);
+      await saveRoute(routeId, routeName || 'Rota sem nome', startTime, endTime, route, imageUri);
 
         Alert.alert('Sucesso', 'Rota salva com sucesso!');
       } catch (error) {
@@ -62,16 +78,28 @@ const stopTracking = async () => {
 
 
   return (
-  <View style={{ paddingTop: 40 }}>
+    <View style={{ flex: 1, padding: 20 }}>
       <Text>{isTracking ? 'Gravando rota...' : 'Pressione para iniciar'}</Text>
+
       {!isTracking && (
-        <TextInput
-          placeholder="Digite o nome da rota"
-          value={routeName}
-          onChangeText={setRouteName} // Atualiza o nome da rota
-          style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
-        />
+        <>
+          <TextInput
+            placeholder="Digite o nome da rota"
+            value={routeName}
+            onChangeText={setRouteName}
+            style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+          />
+          <Button title="Selecionar Imagem" onPress={selectImage} />
+          {imageUri && (
+            <Image
+              source={{ uri: imageUri }}
+              style={{ width: '100%', height: 200, marginTop: 10, borderRadius: 10 }}
+              resizeMode="cover"
+            />
+          )}
+        </>
       )}
+
       <Button title="Iniciar Rota" onPress={startTracking} disabled={isTracking} />
       <Button title="Finalizar Rota" onPress={stopTracking} disabled={!isTracking} />
     </View>
