@@ -4,15 +4,8 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Text>Bem-vindo ao aplicativo!</Text>
-      <Button
-        title="Ir para Rastreamento"
-        onPress={() => navigation.navigate('Tracking')}
-      />
-      <Button
-        title="Ir para Listagem de Rotas"
-        onPress={() => navigation.navigate('Routes')}
-      />
+      <Text style={styles.title}>Bem-vindo ao Jogo!</Text>
+      <Button title="Iniciar Jogo" onPress={() => navigation.navigate('Game')} />
     </View>
   );
 };
@@ -20,9 +13,14 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#111',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 28,
+    marginBottom: 20,
   },
 });
 
