@@ -1,16 +1,21 @@
 import React from 'react';
-import { Image, StyleSheet, Dimensions } from 'react-native';
+import { Image, StyleSheet, Animated } from 'react-native';
+import { NAVE_Y } from '../utils/constants';
 
-const { width, height } = Dimensions.get('window');
-
-const Nave = ({ x }) => {
+const Nave = ({ x, nave }) => {
   return (
-    <Image
-      source={require('../assets/nave.png')}
+    <Animated.Image
+      source={nave.imagem}
       style={[
         styles.nave,
-        { left: x },
+        {
+          width: nave.size,
+          height: nave.size,
+          left: x,
+          top: NAVE_Y,
+        },
       ]}
+      resizeMode="contain"
     />
   );
 };
@@ -18,10 +23,6 @@ const Nave = ({ x }) => {
 const styles = StyleSheet.create({
   nave: {
     position: 'absolute',
-    bottom: 40,
-    width: 60,
-    height: 60,
-    resizeMode: 'contain',
   },
 });
 

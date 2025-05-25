@@ -1,15 +1,21 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Animated, Dimensions } from 'react-native';
 
 const { height } = Dimensions.get('window');
 const NAVE_SIZE = 60;
 const NAVE_Y = height - 40 - NAVE_SIZE;
 
-export default function useTiros(perdeu, xRef) {
+export default function useTiros(perdeu, xRef, intervaloTiro = 500) {
   const [tiros, setTiros] = useState([]);
+  const podeAtirar = useRef(true); // controle do intervalo
 
   const dispararTiro = () => {
-    if (perdeu) return;
+    if (perdeu || !podeAtirar.current) return;
+
+    podeAtirar.current = false;
+    setTimeout(() => {
+      podeAtirar.current = true;
+    }, intervaloTiro);
 
     const tiroAnim = new Animated.Value(NAVE_Y);
     const id = Date.now() + Math.random();
@@ -26,5 +32,5 @@ export default function useTiros(perdeu, xRef) {
     });
   };
 
-return { tiros, dispararTiro, setTiros };
+  return { tiros, dispararTiro, setTiros };
 }
