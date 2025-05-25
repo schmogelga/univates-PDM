@@ -1,17 +1,20 @@
 import React from 'react';
-import { Image, StyleSheet, Animated } from 'react-native';
+import { Animated, StyleSheet, Image } from 'react-native';
 
-const Asteroide = ({ x, y }) => {
+const Asteroide = ({ x, y, size }) => {
   return (
     <Animated.Image
-      source={require('../assets/asteroide.png')} // substitua pela sua imagem
+      source={require('../assets/asteroide.png')} // caminho para sua imagem
       style={[
         styles.asteroide,
         {
+          width: size,
+          height: size,
           left: x,
-          top: y,
+          transform: [{ translateY: y }],
         },
       ]}
+      resizeMode="contain"
     />
   );
 };
@@ -19,9 +22,6 @@ const Asteroide = ({ x, y }) => {
 const styles = StyleSheet.create({
   asteroide: {
     position: 'absolute',
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
   },
 });
 
