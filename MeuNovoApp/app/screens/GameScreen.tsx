@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,25 +13,46 @@ import {
 import StarMap from '../components/StarMap';
 import Nave from '../components/Nave';
 import Asteroide from '../components/Asteroide';
-import Explosao from '../components/Explosao';
+import Explosao  from '../components/Explosao';
 import useAcelerometro from '../hooks/useAcelerometro';
 import useAsteroides from '../hooks/useAsteroides';
 import useColisao from '../hooks/useColisao';
-import useColisaoTiroAsteroide from '../hooks/useColisaoTiroAsteroide';
 import useTiros from '../hooks/useTiros';
+import useColisaoTiroAsteroide from '../hooks/useColisaoTiroAsteroide';
 import { NAVE_Y } from '../utils/constants';
-import { NAVES } from '../utils/constants'; // Certifique-se que o caminho esteja correto
+import { NAVES } from '../utils/constants';
+import Sound from 'react-native-sound';
 
 const GameScreen = ({ navigation }) => {
   const [perdeu, setPerdeu] = useState(false);
   const [naveAtual, setNaveAtual] = useState(NAVES.padrao);
+  const [mostrarExplosao, setMostrarExplosao] = useState(false);
+  const [pontuacao, setPontuacao] = useState(0);
+
   const { x, xRef } = useAcelerometro(naveAtual.velocidade);
   const { asteroides, setAsteroides } = useAsteroides(perdeu);
   const { tiros, dispararTiro, setTiros } = useTiros(perdeu, xRef, naveAtual.intervaloTiro);
-  const [mostrarExplosao, setMostrarExplosao] = useState(false);
 
-  useColisaoTiroAsteroide(tiros, setTiros, asteroides, setAsteroides);
   useColisao(asteroides, xRef, perdeu, setPerdeu, setMostrarExplosao);
+  useColisaoTiroAsteroide( tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao );
+
+  useEffect(() => {
+    musicaFundo = new Sound(require('../assets/musica-fundo.mp3'), (error) => {
+      if (error) {
+        console.log('Erro ao carregar música de fundo', error);
+        return;
+      }
+      musicaFundo.setNumberOfLoops(-1); // Loop infinito
+      musicaFundo.play();
+    });
+
+    return () => {
+      // Para e libera o som quando o componente desmontar
+      musicaFundo.stop(() => {
+        musicaFundo.release();
+      });
+    };
+  }, []);
 
   const trocarNave = () => {
     setNaveAtual((prev) => (prev.id === 'padrao' ? NAVES.leve : NAVES.padrao));
@@ -42,7 +63,11 @@ const GameScreen = ({ navigation }) => {
       <View style={styles.container}>
         <StarMap />
 
-        {/* Botão de troca no canto superior direito */}
+        {/* Pontuação no canto superior esquerdo */}
+        <View style={styles.pontuacaoContainer}>
+          <Text style={styles.pontuacaoTexto}>Pontos: {pontuacao}</Text>
+        </View>
+
         {!perdeu && (
           <Pressable onPress={trocarNave} style={styles.botaoTroca}>
             <Text style={styles.textoBotao}>Trocar Nave</Text>
@@ -77,6 +102,7 @@ const GameScreen = ({ navigation }) => {
         <Modal visible={perdeu} transparent animationType="slide">
           <View style={styles.modal}>
             <Text style={styles.textoModal}>Você perdeu!</Text>
+            <Text style={styles.textoModal}>Pontuação: {pontuacao}</Text>
             <Button title="Sair" onPress={() => navigation.navigate('Home')} />
           </View>
         </Modal>
@@ -118,6 +144,16 @@ const styles = StyleSheet.create({
   textoBotao: {
     color: 'white',
     fontSize: 12,
+  },
+  pontuacaoContainer: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 1,
+  },
+  pontuacaoTexto: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 

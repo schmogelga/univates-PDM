@@ -1,7 +1,13 @@
 import { useEffect } from 'react';
 import { Dimensions } from 'react-native';
 import { NAVE_SIZE, NAVE_Y } from '../utils/constants';
+import Sound from 'react-native-sound';
 
+const deathSound = new Sound(require('../assets/death.mp3'), (error) => {
+  if (error) {
+    console.log('Erro ao carregar som', error);
+  }
+});
 
 export default function useColisao(asteroides, xRef, perdeu, setPerdeu, setMostrarExplosao) {
   useEffect(() => {
@@ -14,6 +20,7 @@ export default function useColisao(asteroides, xRef, perdeu, setPerdeu, setMostr
           const colisaoHorizontal = astX + size >= xRef.current && astX <= xRef.current + NAVE_SIZE;
 
           if (colisaoVertical && colisaoHorizontal) {
+            deathSound.play();
             setPerdeu(true);
             setMostrarExplosao(true);
 
