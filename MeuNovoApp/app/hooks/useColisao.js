@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Dimensions } from 'react-native';
 import { NAVE_SIZE, NAVE_Y } from '../utils/constants';
 import Sound from 'react-native-sound';
@@ -9,30 +9,50 @@ const deathSound = new Sound(require('../assets/death.mp3'), (error) => {
   }
 });
 
-export default function useColisao(asteroides, xRef, perdeu, setPerdeu, setMostrarExplosao) {
-  useEffect(() => {
-    if (perdeu) return;
+export default function useColisao(asteroides, xRef, vidas, setVidas, setMostrarExplosao) {
+  const cooldownRef = useRef(false);
 
-    const interval = setInterval(() => {
-      asteroides.forEach(({ x: astX, y: animY, size }) => {
-        animY.addListener(({ value }) => {
-          const colisaoVertical = value + size >= NAVE_Y && value <= NAVE_Y + NAVE_SIZE;
-          const colisaoHorizontal = astX + size >= xRef.current && astX <= xRef.current + NAVE_SIZE;
+useEffect(() => {
+  if (vidas <= 0) {
+    return;
+  }
 
-          if (colisaoVertical && colisaoHorizontal) {
-            deathSound.play();
-            setPerdeu(true);
-            setMostrarExplosao(true);
+  // Guardar listeners para remover depois
+  const listeners = [];
 
-            setTimeout(() => {
-              setMostrarExplosao(false);
-            }, 1000);
-            clearInterval(interval);
-          }
-        });
-      });
-    }, 100);
+  asteroides.forEach(({ y }) => {
+    const id = y.addListener(({ value }) => {
+      // Só para atualizar a posição se quiser, mas não estritamente necessário
+    });
+    listeners.push({ anim: y, id });
+  });
 
-    return () => clearInterval(interval);
-  }, [asteroides, perdeu]);
+  const interval = setInterval(() => {
+    if (cooldownRef.current) return;
+    for (const { x: astX, y: animY, size } of asteroides) {
+      const posY = animY.__getValue(); // pega valor atual da animação
+      const colisaoVertical = posY + size >= NAVE_Y && posY <= NAVE_Y + NAVE_SIZE;
+      const colisaoHorizontal = astX + size >= xRef.current && astX <= xRef.current + NAVE_SIZE;
+
+      if (colisaoVertical && colisaoHorizontal) {
+        cooldownRef.current = true;
+        deathSound.play();
+        setVidas(v => Math.max(v - 1, 0));
+        setMostrarExplosao(true);
+
+        setTimeout(() => {
+          setMostrarExplosao(false);
+          cooldownRef.current = false;
+        }, 1000);
+
+        break;
+      }
+    }
+  }, 100);
+
+  return () => {
+    clearInterval(interval);
+    listeners.forEach(({ anim, id }) => anim.removeListener(id));
+  };
+}, [asteroides, vidas]);
 }

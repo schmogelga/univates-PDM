@@ -32,27 +32,31 @@ const GameScreen = ({ navigation }) => {
   const { x, xRef } = useAcelerometro(naveAtual.velocidade);
   const { asteroides, setAsteroides } = useAsteroides(perdeu);
   const { tiros, dispararTiro, setTiros } = useTiros(perdeu, xRef, naveAtual.intervaloTiro);
+  const [vidas, setVidas] = useState(3);
+  const musicaFundo = useRef(null);
 
-  useColisao(asteroides, xRef, perdeu, setPerdeu, setMostrarExplosao);
+
+    useColisao(asteroides, xRef, vidas, setVidas, setMostrarExplosao);
   useColisaoTiroAsteroide( tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao );
 
   useEffect(() => {
-    musicaFundo = new Sound(require('../assets/musica-fundo.mp3'), (error) => {
+    if(vidas === 0) setPerdeu(true);
+
+    musicaFundo.current = new Sound(require('../assets/musica-fundo.mp3'), (error) => {
       if (error) {
         console.log('Erro ao carregar música de fundo', error);
         return;
       }
-      musicaFundo.setNumberOfLoops(-1); // Loop infinito
-      musicaFundo.play();
+      musicaFundo.current.setNumberOfLoops(-1); // Loop infinito
+      musicaFundo.current.play();
     });
 
     return () => {
-      // Para e libera o som quando o componente desmontar
-      musicaFundo.stop(() => {
-        musicaFundo.release();
+      musicaFundo.current.stop(() => {
+        musicaFundo.current.release();
       });
     };
-  }, []);
+}, [vidas]);
 
   const trocarNave = () => {
     setNaveAtual((prev) => (prev.id === 'padrao' ? NAVES.leve : NAVES.padrao));
@@ -66,6 +70,12 @@ const GameScreen = ({ navigation }) => {
         {/* Pontuação no canto superior esquerdo */}
         <View style={styles.pontuacaoContainer}>
           <Text style={styles.pontuacaoTexto}>Pontos: {pontuacao}</Text>
+        </View>
+
+        <View style={styles.vidasContainer}>
+          {[...Array(vidas)].map((_, i) => (
+            <Text key={i} style={styles.vida}>❤️</Text>
+          ))}
         </View>
 
         {!perdeu && (
@@ -120,6 +130,17 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.5)',
     zIndex: 1,
+  },
+  vidasContainer: {
+    position: 'absolute',
+    top: 40,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    zIndex: 1,
+  },
+  vida: {
+    fontSize: 18,
+    marginHorizontal: 2,
   },
   modal: {
     flex: 1,
