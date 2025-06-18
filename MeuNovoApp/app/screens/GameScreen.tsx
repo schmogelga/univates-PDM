@@ -22,6 +22,8 @@ import useColisaoTiroAsteroide from '../hooks/useColisaoTiroAsteroide';
 import { NAVE_Y } from '../utils/constants';
 import { NAVES } from '../utils/constants';
 import Sound from 'react-native-sound';
+import Invasor from '../components/Invasor';
+import useInvasores from '../hooks/useInvasores';
 
 const GameScreen = ({ navigation }) => {
   const [perdeu, setPerdeu] = useState(false);
@@ -34,6 +36,7 @@ const GameScreen = ({ navigation }) => {
   const { tiros, dispararTiro, setTiros } = useTiros(perdeu, xRef, naveAtual.intervaloTiro);
   const [vidas, setVidas] = useState(3);
   const musicaFundo = useRef(null);
+  const { invasores, setInvasores } = useInvasores(perdeu);
 
 
     useColisao(asteroides, xRef, vidas, setVidas, setMostrarExplosao);
@@ -94,6 +97,10 @@ const GameScreen = ({ navigation }) => {
         {asteroides.map(({ id, x, y, size }) => (
           <Asteroide key={id} x={x} y={y} size={size} />
         ))}
+        {invasores.map(({ id, x, y, size }) => (
+          <Invasor key={id} x={x} y={y} size={size} />
+        ))}
+
 
         {tiros.map(({ id, x, y }) => (
           <Animated.View
