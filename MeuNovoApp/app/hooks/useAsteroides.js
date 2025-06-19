@@ -10,6 +10,7 @@ export default function useAsteroides(perdeu) {
   const intervaloRef = useRef(null);
 
   useEffect(() => {
+    return;
     if (perdeu) return;
     intervaloRef.current = setInterval(() => {
       const size = 30 + Math.random() * 40;

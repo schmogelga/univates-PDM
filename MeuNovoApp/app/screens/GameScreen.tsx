@@ -19,6 +19,7 @@ import useAsteroides from '../hooks/useAsteroides';
 import useColisao from '../hooks/useColisao';
 import useTiros from '../hooks/useTiros';
 import useColisaoTiroAsteroide from '../hooks/useColisaoTiroAsteroide';
+import useColisaoTiroInvasor from '../hooks/useColisaoTiroInvasor';
 import { NAVE_Y } from '../utils/constants';
 import { NAVES } from '../utils/constants';
 import Sound from 'react-native-sound';
@@ -41,6 +42,8 @@ const GameScreen = ({ navigation }) => {
 
     useColisao(asteroides, xRef, vidas, setVidas, setMostrarExplosao);
   useColisaoTiroAsteroide( tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao );
+  useColisaoTiroInvasor(tiros, setTiros, invasores, setInvasores, pontuacao, setPontuacao);
+
 
   useEffect(() => {
     if(vidas === 0) setPerdeu(true);
@@ -97,8 +100,8 @@ const GameScreen = ({ navigation }) => {
         {asteroides.map(({ id, x, y, size }) => (
           <Asteroide key={id} x={x} y={y} size={size} />
         ))}
-        {invasores.map(({ id, x, y, size }) => (
-          <Invasor key={id} x={x} y={y} size={size} />
+        {invasores.map(({ id, x, y, size, hp }) => (
+          <Invasor key={id} x={x} y={y} size={size} hp={hp} />
         ))}
 
 

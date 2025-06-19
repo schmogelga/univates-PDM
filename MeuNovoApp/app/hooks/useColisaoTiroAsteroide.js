@@ -7,7 +7,6 @@ export default function useColisaoTiroAsteroide(tiros, setTiros, asteroides, set
   const asteroidesRef = useRef(asteroides);
   const pontosRef = useRef(pontuacao);
 
-  // Atualiza os refs sempre que tiros, asteroides ou pontuação mudarem
   useEffect(() => {
     tirosRef.current = tiros;
   }, [tiros]);

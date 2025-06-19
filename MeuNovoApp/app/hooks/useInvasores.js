@@ -40,7 +40,7 @@ export default function useInvasores(perdeu) {
 
       setInvasores((prev) => [
         ...prev,
-        { id, x, y, size: 60 },
+        { id, x, y, size: 60, hp: 5},
       ]);
     }, 7000);
 
