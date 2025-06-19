@@ -14,7 +14,7 @@ const imagens = {
   1: invasor1,
 };
 
-const Invasor = ({ x, y, size, hp }) => {
+const Invasor = ({ x, y, size, hp, maxHp }) => {
   const imagem = imagens[hp] ?? invasor1;
 
   return (

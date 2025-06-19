@@ -52,7 +52,7 @@ export default function useColisaoTiroAsteroideForte(
             if (asteroide.hp > 1) {
               novosAsteroides.push({ ...asteroide, hp: asteroide.hp - 1 });
             } else {
-              pontosGanhos += 30;
+              pontosGanhos += 20;
             }
           } else {
             novosAsteroides.push(asteroide);

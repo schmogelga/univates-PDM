@@ -52,7 +52,7 @@ export default function useColisaoTiroInvasor(
 
             if (atual.hp <= 0) {
               invasoresParaRemover.add(invasor.id);
-              pontosGanhos += 50;
+              pontosGanhos += invasor.maxHp * 10;
             } else {
               invasoresParaAtualizar.set(invasor.id, atual);
             }

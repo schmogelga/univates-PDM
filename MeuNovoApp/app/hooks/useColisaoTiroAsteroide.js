@@ -42,7 +42,7 @@ export default function useColisaoTiroAsteroide(tiros, setTiros, asteroides, set
           if (distanciaX < asteroide.size / 2 && distanciaY < COLISAO_TIRO_ASTEROIDE) {
             tirosParaRemover.add(tiro.id);
             asteroidesParaRemover.add(asteroide.id);
-            pontosGanhos += 10;
+            pontosGanhos += 5;
           }
         });
       });

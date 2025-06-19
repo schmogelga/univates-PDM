@@ -41,13 +41,12 @@ const {x, xRef} = useAcelerometro(naveAtual.velocidade);
 const {asteroides, setAsteroides} = useAsteroides(perdeu);
 const {asteroidesFortes, setAsteroidesFortes} = useAsteroidesFortes(perdeu);
 const {tiros, dispararTiro, setTiros} = useTiros(perdeu, xRef, naveAtual.intervaloTiro);
-const [vidas, setVidas] = useState(10);
+const [vidas, setVidas] = useState(3);
 const musicaFundo = useRef(null);
-const {invasores, setInvasores} = useInvasores(perdeu);
+const {invasores, setInvasores} = useInvasores(perdeu, pontuacao);
 const [escudos, setEscudos] = useState([]);
 const [proxPontuacaoEscudo, setProxPontuacaoEscudo] = useState(20);
 const escudoOpacity = useRef(new Animated.Value(0.2)).current;
-
 
 useColisao(asteroidesFortes, setAsteroidesFortes, asteroides, setAsteroides, invasores, setInvasores, escudos, setEscudos, xRef, vidas, setVidas, setMostrarExplosao, escudoAtivo, setEscudoAtivo);
 useColisaoTiroAsteroide( tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao );
@@ -119,7 +118,7 @@ useColisaoTiroInvasor(tiros, setTiros, invasores, setInvasores, pontuacao, setPo
           setEscudos((prev) => prev.filter((e) => e.id !== id));
         });
 
-        setProxPontuacaoEscudo((prev) => prev + 1000); // próxima meta
+        setProxPontuacaoEscudo((prev) => prev + 200); // próxima meta
       }
     }, [pontuacao]);
 
