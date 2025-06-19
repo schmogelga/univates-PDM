@@ -13,37 +13,46 @@ import {
 import StarMap from '../components/StarMap';
 import Nave from '../components/Nave';
 import Asteroide from '../components/Asteroide';
+import AsteroideForte from '../components/AsteroideForte';
 import Explosao  from '../components/Explosao';
 import useAcelerometro from '../hooks/useAcelerometro';
 import useAsteroides from '../hooks/useAsteroides';
+import useAsteroidesFortes from '../hooks/useAsteroidesFortes';
 import useColisao from '../hooks/useColisao';
 import useTiros from '../hooks/useTiros';
 import useColisaoTiroAsteroide from '../hooks/useColisaoTiroAsteroide';
+import useColisaoTiroAsteroideForte from '../hooks/useColisaoTiroAsteroideForte';
 import useColisaoTiroInvasor from '../hooks/useColisaoTiroInvasor';
 import { NAVE_Y } from '../utils/constants';
 import { NAVES } from '../utils/constants';
 import Sound from 'react-native-sound';
 import Invasor from '../components/Invasor';
 import useInvasores from '../hooks/useInvasores';
+import Escudo from '../components/Escudo';
 
 const GameScreen = ({ navigation }) => {
-  const [perdeu, setPerdeu] = useState(false);
-  const [naveAtual, setNaveAtual] = useState(NAVES.padrao);
-  const [mostrarExplosao, setMostrarExplosao] = useState(false);
-  const [pontuacao, setPontuacao] = useState(0);
+const [perdeu, setPerdeu] = useState(false);
+const [escudoAtivo, setEscudoAtivo] = useState(false);
+const [naveAtual, setNaveAtual] = useState(NAVES.padrao);
+const [mostrarExplosao, setMostrarExplosao] = useState(false);
+const [pontuacao, setPontuacao] = useState(0);
 
-  const { x, xRef } = useAcelerometro(naveAtual.velocidade);
-  const { asteroides, setAsteroides } = useAsteroides(perdeu);
-  const { tiros, dispararTiro, setTiros } = useTiros(perdeu, xRef, naveAtual.intervaloTiro);
-  const [vidas, setVidas] = useState(3);
-  const musicaFundo = useRef(null);
-  const { invasores, setInvasores } = useInvasores(perdeu);
+const {x, xRef} = useAcelerometro(naveAtual.velocidade);
+const {asteroides, setAsteroides} = useAsteroides(perdeu);
+const {asteroidesFortes, setAsteroidesFortes} = useAsteroidesFortes(perdeu);
+const {tiros, dispararTiro, setTiros} = useTiros(perdeu, xRef, naveAtual.intervaloTiro);
+const [vidas, setVidas] = useState(10);
+const musicaFundo = useRef(null);
+const {invasores, setInvasores} = useInvasores(perdeu);
+const [escudos, setEscudos] = useState([]);
+const [proxPontuacaoEscudo, setProxPontuacaoEscudo] = useState(20);
+const escudoOpacity = useRef(new Animated.Value(0.2)).current;
 
 
-    useColisao(asteroides, xRef, vidas, setVidas, setMostrarExplosao);
-  useColisaoTiroAsteroide( tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao );
-  useColisaoTiroInvasor(tiros, setTiros, invasores, setInvasores, pontuacao, setPontuacao);
-
+useColisao(asteroidesFortes, setAsteroidesFortes, asteroides, setAsteroides, invasores, setInvasores, escudos, setEscudos, xRef, vidas, setVidas, setMostrarExplosao, escudoAtivo, setEscudoAtivo);
+useColisaoTiroAsteroide( tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao );
+useColisaoTiroAsteroideForte( tiros, setTiros, asteroidesFortes, setAsteroidesFortes, pontuacao, setPontuacao );
+useColisaoTiroInvasor(tiros, setTiros, invasores, setInvasores, pontuacao, setPontuacao);
 
   useEffect(() => {
     if(vidas === 0) setPerdeu(true);
@@ -68,21 +77,85 @@ const GameScreen = ({ navigation }) => {
     setNaveAtual((prev) => (prev.id === 'padrao' ? NAVES.leve : NAVES.padrao));
   };
 
+    useEffect(() => {
+      if (escudoAtivo) {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(escudoOpacity, {
+              toValue: 0.6,
+              duration: 800,
+              useNativeDriver: false,
+            }),
+            Animated.timing(escudoOpacity, {
+              toValue: 0.2,
+              duration: 800,
+              useNativeDriver: false,
+            }),
+          ])
+        ).start();
+      } else {
+        escudoOpacity.setValue(0.2);
+      }
+    }, [escudoAtivo]);
+
+    useEffect(() => {
+      if (pontuacao >= proxPontuacaoEscudo) {
+        const size = 40;
+        //const startX = Math.random() * (Dimensions.get('window').width - size);
+        const startX = (Dimensions.get('window').width - size) / 2;
+        const animY = new Animated.Value(0);
+        const id = Date.now() + Math.random();
+
+        setEscudos((prev) => [
+          ...prev,
+          { id, x: startX, y: animY, size }
+        ]);
+
+        Animated.timing(animY, {
+          toValue: Dimensions.get('window').height,
+          duration: 6000,
+          useNativeDriver: true,
+        }).start(() => {
+          setEscudos((prev) => prev.filter((e) => e.id !== id));
+        });
+
+        setProxPontuacaoEscudo((prev) => prev + 1000); // próxima meta
+      }
+    }, [pontuacao]);
+
   return (
     <TouchableWithoutFeedback onPress={dispararTiro}>
       <View style={styles.container}>
         <StarMap />
 
-        {/* Pontuação no canto superior esquerdo */}
         <View style={styles.pontuacaoContainer}>
           <Text style={styles.pontuacaoTexto}>Pontos: {pontuacao}</Text>
         </View>
-
         <View style={styles.vidasContainer}>
           {[...Array(vidas)].map((_, i) => (
             <Text key={i} style={styles.vida}>❤️</Text>
           ))}
         </View>
+
+        {escudoAtivo && (
+          <Animated.View
+            style={{
+                position: 'absolute',
+                top: NAVE_Y - 10,
+                left: Animated.add(x, new Animated.Value(-10)),
+                width: naveAtual.size + 20,
+                height: naveAtual.size + 20,
+                borderRadius: (naveAtual.size + 20) / 2,
+                backgroundColor: escudoOpacity.interpolate({
+                    inputRange: [0.2, 0.6],
+                    outputRange: ['rgba(173, 216, 230, 0.2)', 'rgba(135, 206, 250, 0.6)'],
+                }),
+                borderWidth: 2,
+                borderColor: 'rgba(255, 255, 0, 0.9)',
+                zIndex: 2,
+            }}
+          />
+        )}
 
         {!perdeu && (
           <Pressable onPress={trocarNave} style={styles.botaoTroca}>
@@ -100,8 +173,14 @@ const GameScreen = ({ navigation }) => {
         {asteroides.map(({ id, x, y, size }) => (
           <Asteroide key={id} x={x} y={y} size={size} />
         ))}
+        {asteroidesFortes.map(({ id, x, y, size, hp }) => (
+          <AsteroideForte key={id} x={x} y={y} size={size} hp={hp} />
+        ))}
         {invasores.map(({ id, x, y, size, hp }) => (
           <Invasor key={id} x={x} y={y} size={size} hp={hp} />
+        ))}
+        {escudos.map(({ id, x, y, size }) => (
+          <Escudo key={id} x={x} y={y} size={size} />
         ))}
 
 

@@ -1,10 +1,17 @@
 import { useEffect, useRef } from 'react';
 
-export default function useColisaoTiroAsteroide(tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao) {
+export default function useColisaoTiroAsteroideForte(
+  tiros,
+  setTiros,
+  asteroidesFortes,
+  setAsteroidesFortes,
+  pontuacao,
+  setPontuacao
+) {
   const rafId = useRef(null);
 
   const tirosRef = useRef(tiros);
-  const asteroidesRef = useRef(asteroides);
+  const asteroidesRef = useRef(asteroidesFortes);
   const pontosRef = useRef(pontuacao);
 
   useEffect(() => {
@@ -12,8 +19,8 @@ export default function useColisaoTiroAsteroide(tiros, setTiros, asteroides, set
   }, [tiros]);
 
   useEffect(() => {
-    asteroidesRef.current = asteroides;
-  }, [asteroides]);
+    asteroidesRef.current = asteroidesFortes;
+  }, [asteroidesFortes]);
 
   useEffect(() => {
     pontosRef.current = pontuacao;
@@ -27,7 +34,7 @@ export default function useColisaoTiroAsteroide(tiros, setTiros, asteroides, set
       const asteroidesAtuais = asteroidesRef.current;
 
       const tirosParaRemover = new Set();
-      const asteroidesParaRemover = new Set();
+      const novosAsteroides = [];
       let pontosGanhos = 0;
 
       tirosAtuais.forEach((tiro) => {
@@ -41,15 +48,21 @@ export default function useColisaoTiroAsteroide(tiros, setTiros, asteroides, set
 
           if (distanciaX < asteroide.size / 2 && distanciaY < COLISAO_TIRO_ASTEROIDE) {
             tirosParaRemover.add(tiro.id);
-            asteroidesParaRemover.add(asteroide.id);
-            pontosGanhos += 10;
+
+            if (asteroide.hp > 1) {
+              novosAsteroides.push({ ...asteroide, hp: asteroide.hp - 1 });
+            } else {
+              pontosGanhos += 30;
+            }
+          } else {
+            novosAsteroides.push(asteroide);
           }
         });
       });
 
-      if (tirosParaRemover.size > 0 || asteroidesParaRemover.size > 0) {
+      if (tirosParaRemover.size > 0) {
         setTiros((prev) => prev.filter((t) => !tirosParaRemover.has(t.id)));
-        setAsteroides((prev) => prev.filter((a) => !asteroidesParaRemover.has(a.id)));
+        setAsteroidesFortes(novosAsteroides);
         if (pontosGanhos > 0) {
           setPontuacao((prev) => prev + pontosGanhos);
         }
@@ -61,5 +74,5 @@ export default function useColisaoTiroAsteroide(tiros, setTiros, asteroides, set
     rafId.current = requestAnimationFrame(checarColisoes);
 
     return () => cancelAnimationFrame(rafId.current);
-  }, [setTiros, setAsteroides, setPontuacao]);
+  }, [setTiros, setAsteroidesFortes, setPontuacao]);
 }
