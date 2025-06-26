@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import HomeScreen from './screens/HomeScreen';
 import GameScreen from './screens/GameScreen';
+import RankingScreen from './screens/RankingScreen';
 
 const Stack = createStackNavigator();
 
@@ -12,6 +13,7 @@ const AppNavigator = () => {
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Game" component={GameScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Ranking" component={RankingScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -29,8 +29,9 @@ import Sound from 'react-native-sound';
 import Invasor from '../components/Invasor';
 import useInvasores from '../hooks/useInvasores';
 import Escudo from '../components/Escudo';
+import { salvarPontuacao  } from '../storage/LeaderboardStorage';
 
-const GameScreen = ({ navigation }) => {
+const GameScreen = ({ navigation, route }) => {
 const [perdeu, setPerdeu] = useState(false);
 const [escudoAtivo, setEscudoAtivo] = useState(false);
 const [naveAtual, setNaveAtual] = useState(NAVES.padrao);
@@ -48,13 +49,18 @@ const [escudos, setEscudos] = useState([]);
 const [proxPontuacaoEscudo, setProxPontuacaoEscudo] = useState(20);
 const escudoOpacity = useRef(new Animated.Value(0.2)).current;
 
+const { nome } = route.params;
+
 useColisao(asteroidesFortes, setAsteroidesFortes, asteroides, setAsteroides, invasores, setInvasores, escudos, setEscudos, xRef, vidas, setVidas, setMostrarExplosao, escudoAtivo, setEscudoAtivo);
 useColisaoTiroAsteroide( tiros, setTiros, asteroides, setAsteroides, pontuacao, setPontuacao );
 useColisaoTiroAsteroideForte( tiros, setTiros, asteroidesFortes, setAsteroidesFortes, pontuacao, setPontuacao );
 useColisaoTiroInvasor(tiros, setTiros, invasores, setInvasores, pontuacao, setPontuacao);
 
   useEffect(() => {
-    if(vidas === 0) setPerdeu(true);
+    if(vidas === 0){
+        setPerdeu(true);
+        salvarPontuacao(nome, pontuacao);
+    }
 
     musicaFundo.current = new Sound(require('../assets/musica-fundo.mp3'), (error) => {
       if (error) {
