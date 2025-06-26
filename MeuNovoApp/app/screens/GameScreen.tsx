@@ -9,6 +9,7 @@ import {
   Animated,
   Dimensions,
   Pressable,
+  TouchableOpacity,
 } from 'react-native';
 import StarMap from '../components/StarMap';
 import Nave from '../components/Nave';
@@ -207,7 +208,9 @@ useColisaoTiroInvasor(tiros, setTiros, invasores, setInvasores, pontuacao, setPo
           <View style={styles.modal}>
             <Text style={styles.textoModal}>Você perdeu!</Text>
             <Text style={styles.textoModal}>Pontuação: {pontuacao}</Text>
-            <Button title="Sair" onPress={() => navigation.navigate('Home')} />
+            <TouchableOpacity style={styles.arcadeButton} onPress={() => navigation.navigate('Home')}>
+              <Text style={styles.arcadeButtonText}>Sair</Text>
+            </TouchableOpacity>
           </View>
         </Modal>
       </View>
@@ -242,11 +245,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 2,
   },
-  textoModal: {
-    color: 'white',
-    fontSize: 24,
-    marginBottom: 20,
-  },
+textoModal: {
+  color: 'white',
+  fontSize: 12,
+  fontFamily: 'PressStart2P-Regular',
+  textAlign: 'center',
+  marginBottom: 10,
+},
   botaoTroca: {
     position: 'absolute',
     top: 40,
@@ -256,20 +261,37 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 10,
   },
-  textoBotao: {
-    color: 'white',
-    fontSize: 12,
-  },
+textoBotao: {
+  color: 'white',
+  fontSize: 10,
+  fontFamily: 'PressStart2P-Regular',
+},
   pontuacaoContainer: {
     position: 'absolute',
     top: 40,
     left: 20,
     zIndex: 1,
   },
-  pontuacaoTexto: {
-    color: 'white',
-    fontSize: 16,
+pontuacaoTexto: {
+  color: 'white',
+  fontSize: 10,
+  fontFamily: 'PressStart2P-Regular',
+},
+  arcadeButton: {
+    borderWidth: 2,
+    borderColor: '#fff',
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginTop: 20,
+    alignItems: 'center',
   },
+    arcadeButtonText: {
+      color: '#fff',
+      fontSize: 10,
+      fontFamily: 'PressStart2P-Regular',
+      textAlign: 'center',
+    },
 });
 
 export default GameScreen;

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Button,
   StyleSheet,
   Modal,
   TextInput,
   TouchableOpacity,
 } from 'react-native';
+import StarMap from '../components/StarMap';
 
 interface Props {
   navigation: any;
@@ -25,10 +25,18 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+    <View style={styles.starMapWrapper}>
+    <StarMap />
+    </View>
       <Text style={styles.title}>Bem-vindo ao Jogo!</Text>
 
-      <Button title="Iniciar Jogo" onPress={() => setModalVisible(true)} />
-      <Button title="Leaderboard" onPress={() => navigation.navigate('Ranking')} />
+      <TouchableOpacity style={styles.arcadeButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.arcadeButtonText}>Iniciar Jogo</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.arcadeButton} onPress={() => navigation.navigate('Ranking')}>
+        <Text style={styles.arcadeButtonText}>Leaderboard</Text>
+      </TouchableOpacity>
 
       <Modal transparent visible={modalVisible} animationType="fade">
         <View style={styles.modalBackground}>
@@ -41,8 +49,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               onChangeText={setNome}
               value={nome}
             />
-            <TouchableOpacity style={styles.botao} onPress={iniciarJogo}>
-              <Text style={styles.botaoTexto}>Começar</Text>
+            <TouchableOpacity style={styles.arcadeButton} onPress={iniciarJogo}>
+              <Text style={styles.arcadeButtonText}>Começar</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text style={styles.cancelar}>Cancelar</Text>
@@ -55,16 +63,43 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#111',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+container: {
+  flex: 1,
+  backgroundColor: '#111',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'relative', // garante empilhamento correto
+},
+
+starMapWrapper: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: -999,
+},
+
   title: {
     color: '#fff',
-    fontSize: 28,
+    fontSize: 12,
+    fontFamily: 'PressStart2P-Regular',
+    textAlign: 'center',
     marginBottom: 20,
+  },
+  arcadeButton: {
+    borderWidth: 2,
+    borderColor: '#fff',
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginVertical: 8,
+  },
+  arcadeButtonText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: 'PressStart2P-Regular',
+    textAlign: 'center',
   },
   modalBackground: {
     flex: 1,
@@ -80,7 +115,9 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 10,
+    fontFamily: 'PressStart2P-Regular',
+    textAlign: 'center',
     marginBottom: 10,
   },
   input: {
@@ -89,21 +126,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 15,
-  },
-  botao: {
-    backgroundColor: '#4caf50',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontWeight: 'bold',
+    fontFamily: 'PressStart2P-Regular',
+    fontSize: 10,
   },
   cancelar: {
     marginTop: 10,
     color: '#bbb',
     textAlign: 'center',
+    fontSize: 10,
+    fontFamily: 'PressStart2P-Regular',
   },
 });
 

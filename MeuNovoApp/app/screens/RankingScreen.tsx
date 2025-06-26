@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, FlatList } from 'react-native';
+import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { buscarRanking } from '../storage/LeaderboardStorage';
 
 interface Pontuacao {
   id: number;
   nome: string;
-  pontuacao: number;
+  pontos: number;
 }
 
 interface Props {
@@ -27,7 +27,7 @@ const RankingScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Ranking</Text>
+      <Text style={styles.title}>RANKING</Text>
       <FlatList
         data={ranking}
         keyExtractor={(item) => item.id.toString()}
@@ -37,7 +37,10 @@ const RankingScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
         )}
       />
-      <Button title="Voltar" onPress={() => navigation.goBack()} />
+
+      <TouchableOpacity style={styles.arcadeButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.arcadeButtonText}>Voltar</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -51,14 +54,31 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#fff',
-    fontSize: 26,
+    fontSize: 12,
+    fontFamily: 'PressStart2P-Regular',
     marginBottom: 20,
     textAlign: 'center',
   },
   item: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 10,
+    fontFamily: 'PressStart2P-Regular',
     marginVertical: 6,
+  },
+  arcadeButton: {
+    borderWidth: 2,
+    borderColor: '#fff',
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  arcadeButtonText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: 'PressStart2P-Regular',
+    textAlign: 'center',
   },
 });
 
