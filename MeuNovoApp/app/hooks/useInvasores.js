@@ -46,11 +46,13 @@ export default function useInvasores(perdeu, pontuacao) {
       const amplitudeX = 40 + Math.random() * 60;
       const freq = 0.001 + Math.random() * 0.0015;
 
-      Animated.timing(y, {
-        toValue: height,
-        duration,
-        useNativeDriver: false,
-      }).start();
+        Animated.timing(y, {
+          toValue: height + 100, // garante que saia completamente da tela
+          duration,
+          useNativeDriver: false,
+        }).start(() => {
+          setInvasores((prev) => prev.filter((inv) => inv.id !== id));
+        });
 
       const updateX = () => {
         const elapsed = Date.now() - startTime;
